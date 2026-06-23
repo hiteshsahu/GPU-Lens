@@ -1,0 +1,73 @@
+{{- if .Values.prometheusRule.enabled }}
+{{- $t := .Values.prometheusRule.thresholds }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "gpulens.fullname" . }}
+  labels:
+    {{- include "gpulens.labels" . | nindent 4 }}
+    {{- with .Values.prometheusRule.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+    - name: gpulens.gpu
+      rules:
+        - alert: GPUExporterDown
+          expr: up{job=~".*dcgm.*"} == 0
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "DCGM exporter down ({{`{{ $labels.instance }}`}})"
+        - alert: GPUHighTemperature
+          expr: DCGM_FI_DEV_GPU_TEMP > {{ $t.gpuTempCelsius }}
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "GPU {{`{{ $labels.gpu }}`}} >{{ $t.gpuTempCelsius }}°C on {{`{{ $labels.Hostname }}`}}"
+        - alert: GPUMemoryNearFull
+          expr: DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE) > {{ $t.gpuMemFraction }}
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "GPU {{`{{ $labels.gpu }}`}} memory >{{ $t.gpuMemFraction }} on {{`{{ $labels.Hostname }}`}}"
+        - alert: GPUDoubleBitECCError
+          expr: increase(DCGM_FI_DEV_ECC_DBE_VOL_TOTAL[10m]) > 0
+          labels: { severity: critical }
+          annotations:
+            summary: "Uncorrectable ECC error on GPU {{`{{ $labels.gpu }}`}} ({{`{{ $labels.Hostname }}`}})"
+        - alert: GPUXidError
+          expr: DCGM_FI_DEV_XID_ERRORS > 0
+          for: 1m
+          labels: { severity: critical }
+          annotations:
+            summary: "XID error on GPU {{`{{ $labels.gpu }}`}} ({{`{{ $labels.Hostname }}`}})"
+        - alert: GPUIdleReservationWaste
+          expr: avg_over_time(DCGM_FI_DEV_GPU_UTIL[30m]) < {{ $t.gpuIdleUtilPercent }}
+          for: 30m
+          labels: { severity: info }
+          annotations:
+            summary: "GPU {{`{{ $labels.gpu }}`}} <{{ $t.gpuIdleUtilPercent }}% util for 30m (possible waste)"
+    {{- if .Values.prometheusRule.slurmAlerts.enabled }}
+    - name: gpulens.slurm
+      rules:
+        - alert: SlurmExporterDown
+          expr: up{job=~".*slurm.*"} == 0
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "SLURM exporter down"
+        - alert: SlurmNodesDown
+          expr: slurm_nodes_down > 0
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "{{`{{ $value }}`}} SLURM node(s) DOWN"
+        - alert: SlurmQueueBacklog
+          expr: slurm_queue_pending > {{ .Values.prometheusRule.slurmAlerts.queuePendingThreshold }}
+          for: 15m
+          labels: { severity: warning }
+          annotations:
+            summary: "SLURM pending queue backlog"
+    {{- end }}
+{{- end }}

@@ -1,0 +1,18 @@
+{{- if .Values.dcgmExporter.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gpulens.fullname" . }}-dcgm
+  labels:
+    {{- include "gpulens.labels" . | nindent 4 }}
+    component: dcgm-exporter
+spec:
+  clusterIP: None   # headless: one endpoint per node for per-GPU scraping
+  selector:
+    {{- include "gpulens.selectorLabels" . | nindent 4 }}
+    component: dcgm-exporter
+  ports:
+    - name: metrics
+      port: {{ .Values.dcgmExporter.port }}
+      targetPort: metrics
+{{- end }}

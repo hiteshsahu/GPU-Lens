@@ -1,0 +1,58 @@
+# gpulens — values.yaml
+# This file is the interface to the tool. Every cluster-specific assumption is a
+# knob here; nothing is hardcoded.
+
+dcgmExporter:
+  enabled: true
+  image:
+    repository: nvcr.io/nvidia/k8s/dcgm-exporter
+    tag: "3.3.5-3.4.0-ubuntu22.04"
+    pullPolicy: IfNotPresent
+  port: 9400
+
+  # GPU nodes are usually tainted and labelled. Defaults match the NVIDIA GPU
+  # Operator's NFD labels/taints — override for your cluster.
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+  # DCGM needs GPU access. With the NVIDIA container runtime as default this is
+  # automatic; otherwise set the runtimeClassName.
+  runtimeClassName: ""   # e.g. "nvidia"
+
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Integration with an existing Prometheus Operator (kube-prometheus-stack).
+serviceMonitor:
+  enabled: true
+  # Must match your Prometheus's serviceMonitorSelector. kube-prometheus-stack
+  # commonly uses release: <name>; set it here.
+  additionalLabels: {}
+  interval: 15s
+
+# Alert rules (PrometheusRule CRD). Thresholds are tunable.
+prometheusRule:
+  enabled: true
+  additionalLabels: {}
+  thresholds:
+    gpuTempCelsius: 85
+    gpuMemFraction: 0.95        # fraction of framebuffer used
+    gpuIdleUtilPercent: 5       # below this = waste warning
+  # SLURM alerts only make sense if a SLURM exporter feeds the same Prometheus.
+  slurmAlerts:
+    enabled: false
+    queuePendingThreshold: 50
+
+# Dashboards: handled out-of-band by ./go dashboards-k8s, which creates a
+# ConfigMap from the official DCGM dashboard JSON (gnetId 12239) labelled for
+# the Grafana sidecar. We do not template hand-written dashboard JSON here.
+dashboards:
+  sidecarLabel: "grafana_dashboard"

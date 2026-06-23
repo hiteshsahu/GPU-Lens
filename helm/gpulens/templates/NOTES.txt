@@ -1,0 +1,19 @@
+gpulens installed.
+
+DCGM exporter is rolling out as a DaemonSet on GPU nodes
+(selector: {{ .Values.dcgmExporter.nodeSelector }}).
+
+1. Check the exporter is running on your GPU nodes:
+   kubectl get pods -l component=dcgm-exporter -o wide
+
+2. Confirm Prometheus is scraping it:
+   - ServiceMonitor enabled: {{ .Values.serviceMonitor.enabled }}
+   - It must match your Prometheus serviceMonitorSelector. If targets don't
+     appear in Prometheus, set serviceMonitor.additionalLabels to match
+     (kube-prometheus-stack usually needs `release: <your-release>`).
+
+3. Import the GPU dashboard (run from the repo root):
+   ./go dashboards-k8s --namespace {{ .Release.Namespace }}
+
+4. Alerts (PrometheusRule) enabled: {{ .Values.prometheusRule.enabled }}
+   Tune thresholds under prometheusRule.thresholds in values.yaml.

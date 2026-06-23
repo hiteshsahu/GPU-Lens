@@ -1,0 +1,19 @@
+{{- if and .Values.dcgmExporter.enabled .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "gpulens.fullname" . }}-dcgm
+  labels:
+    {{- include "gpulens.labels" . | nindent 4 }}
+    {{- with .Values.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "gpulens.selectorLabels" . | nindent 6 }}
+      component: dcgm-exporter
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+{{- end }}

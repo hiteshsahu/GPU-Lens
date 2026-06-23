@@ -1,0 +1,39 @@
+{{- if .Values.dcgmExporter.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "gpulens.fullname" . }}-dcgm
+  labels:
+    {{- include "gpulens.labels" . | nindent 4 }}
+    component: dcgm-exporter
+spec:
+  selector:
+    matchLabels:
+      {{- include "gpulens.selectorLabels" . | nindent 6 }}
+      component: dcgm-exporter
+  template:
+    metadata:
+      labels:
+        {{- include "gpulens.selectorLabels" . | nindent 8 }}
+        component: dcgm-exporter
+    spec:
+      {{- with .Values.dcgmExporter.runtimeClassName }}
+      runtimeClassName: {{ . }}
+      {{- end }}
+      nodeSelector:
+        {{- toYaml .Values.dcgmExporter.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.dcgmExporter.tolerations | nindent 8 }}
+      containers:
+        - name: dcgm-exporter
+          image: "{{ .Values.dcgmExporter.image.repository }}:{{ .Values.dcgmExporter.image.tag }}"
+          imagePullPolicy: {{ .Values.dcgmExporter.image.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.dcgmExporter.port }}
+          securityContext:
+            capabilities:
+              add: ["SYS_ADMIN"]
+          resources:
+            {{- toYaml .Values.dcgmExporter.resources | nindent 12 }}
+{{- end }}

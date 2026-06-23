@@ -1,0 +1,15 @@
+apiVersion: v2
+name: gpulens
+description: Drop-in GPU + scheduler observability for Kubernetes GPU clusters (DCGM exporter, ServiceMonitor, alert rules).
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - gpu
+  - nvidia
+  - dcgm
+  - observability
+  - prometheus
+home: https://github.com/hiteshsahu/gpulens
+maintainers:
+  - name: Hitesh Sahu
