@@ -1,0 +1,41 @@
+# gpulens compose stack — Prometheus + Grafana + (optional) slurm-exporter.
+# DCGM exporters are expected to already run on your GPU nodes; gpulens scrapes
+# them. Bring the stack up with: ./go compose
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.rules.yml:/etc/prometheus/alerts.rules.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      - prometheus
+
+  # Optional: only started with `--profile slurm`. If you already run a SLURM
+  # exporter, leave this off and point SLURM_EXPORTER_TARGET at it instead.
+  slurm-exporter:
+    image: ghcr.io/rivosinc/prometheus-slurm-exporter:latest
+    restart: unless-stopped
+    profiles: ["slurm"]
+    volumes:
+      - ${SLURM_CONF_PATH:-/etc/slurm}:/etc/slurm:ro
+      - ${MUNGE_SOCKET_PATH:-/run/munge}:/run/munge:ro
+
+volumes:
+  prometheus-data:
+  grafana-data:

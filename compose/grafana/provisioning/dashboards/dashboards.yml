@@ -1,0 +1,12 @@
+apiVersion: 1
+providers:
+  - name: gpulens
+    orgId: 1
+    folder: GPULens
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      # JSON is fetched here by ./go (official dashboards by ID),
+      # so we never ship hand-written, untested dashboard JSON.
+      path: /var/lib/grafana/dashboards
