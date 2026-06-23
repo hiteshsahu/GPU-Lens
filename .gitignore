@@ -1,0 +1,17 @@
+# Secrets / local config — copy from compose/.env.example instead.
+.env
+
+# Generated at install time by ./go (compose / dashboards / dashboards-k8s) —
+# never hand-edited or shipped, so it doesn't belong in git.
+compose/prometheus/prometheus.yml
+compose/grafana/dashboards/
+
+# sed -i.bak backup files
+*.bak
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
