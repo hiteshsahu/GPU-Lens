@@ -1,4 +1,7 @@
-# Rendered from prometheus.yml.tpl by scripts/install.sh using values in .env.
+# Copyright 2026 Hitesh Kumar Sahu — https://hiteshsahu.com
+# SPDX-License-Identifier: Apache-2.0
+
+# Rendered from prometheus.yml.tpl by ./go using values in .env.
 # Targets are injected so users point gpulens at THEIR existing exporters.
 global:
   scrape_interval: 15s

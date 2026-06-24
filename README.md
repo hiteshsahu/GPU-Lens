@@ -2,8 +2,8 @@
 
 > **Drop-in GPU + scheduler observability for clusters you already have.**
 
-![](./img//slurm.png)
-
+![GPU-LENS](./img/gpu-lens.png)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 Point gpulens at an existing GPU cluster and get two layers of visibility in
 minutes 
@@ -23,7 +23,7 @@ Most monitoring repos are a lab you read. gpulens is a tool you install on
 ## What you get
 
 
-![](./img/cover.png)
+![gpulens architecture](./img/architecture.png)
 
 
 
@@ -101,7 +101,6 @@ flowchart LR
     ALERT --> DETECT
     ALERT --> EFF
 ```
-
 
 ----
 
@@ -356,3 +355,12 @@ stack), and it doesn't provision a cluster (that's a different tool).
 
 > SLURM exporter metric names vary by implementation. The alert rules match the
 > common `vpenso/prometheus-slurm-exporter` names; adjust if you use another.
+
+---
+
+## License
+*© 2026 [Hitesh Kumar Sahu](https://hiteshsahu.com) · Licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)*
+
+
+
+

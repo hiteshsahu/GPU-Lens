@@ -1,3 +1,6 @@
+# Copyright 2026 Hitesh Kumar Sahu — https://hiteshsahu.com
+# SPDX-License-Identifier: Apache-2.0
+
 # gpulens compose stack — Prometheus + Grafana + (optional) slurm-exporter.
 # DCGM exporters are expected to already run on your GPU nodes; gpulens scrapes
 # them. Bring the stack up with: ./go compose
